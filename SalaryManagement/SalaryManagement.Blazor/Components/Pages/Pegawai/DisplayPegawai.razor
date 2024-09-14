@@ -1,0 +1,54 @@
+﻿@page "/pegawai/"
+@inject PegawaiService _pegawaiService;
+@using SalaryManagement.Blazor.ViewModels
+
+<h3>List Data Pegawai</h3>
+
+<PageTitle>Pegawai</PageTitle>
+
+@if (!listPegawaiVM.Any())
+{
+  <p>Loading...</p>
+}
+else
+{
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          <label>@listPegawaiVM.</label>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+}
+
+
+@code {
+  List<PegawaiVM> listPegawaiVM = [];
+
+  protected override async Task OnInitializedAsync()
+  {
+    var listPegawai = await _pegawaiService.GetAllPegawai();
+    var result = listPegawai.Select(x => new PegawaiVM
+      {
+        NomerPegawai = x.NomerPegawai,
+        NamaPegawai = x.NamaPegawai,
+        TanggalMasuk = x.TanggalMasuk,
+        JenisKelamin = x.JenisKelamin,
+        Status = x.Status.JenisStatus,
+        GajiPokok = x.GajiPokok,
+        UangMakan = x.UangMakan,
+        UangTransport = x.UangTransport,
+        UangLembur = x.UangLembur,
+        NilaiTunjangan = x.NilaiTunjangan,
+        TotalGaji = x.TotalGaji
+      });
+    listPegawaiVM = result.ToList();
+  }
+}

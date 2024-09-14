@@ -1,0 +1,68 @@
+﻿@page "/pegawai/create"
+@rendermode InteractiveServer
+@inject PegawaiService _pegawaiService;
+@attribute [StreamRendering]
+
+<PageTitle>Pegawai</PageTitle>
+
+<h1>Buat Data Pegawai</h1>
+
+<p>Buat Data Pegawai untuk dimasukan ke database dan untuk melihat gaji</p>
+
+<EditForm Model=@pegawaiVM class="col-6">
+  <ValidationSummary />
+  <div class="mb-3">
+    <label class="form-label">Nama Pegawai : @pegawaiVM.NamaPegawai</label>
+    <InputText class="form-control" @bind-Value="pegawaiVM.NamaPegawai" />
+    <input class="form-control" @bind="@pegawaiVM.NamaPegawai" @bind:event="oninput" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Tanggal Masuk: @pegawaiVM.TanggalMasuk</label>
+    <InputDate class="form-control" @bind-Value="pegawaiVM.TanggalMasuk" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Jenis Kelamin : @pegawaiVM.JenisKelamin</label>
+    <InputSelect class="form-select" @bind-Value="pegawaiVM.JenisKelamin">
+      @foreach (var jenisKelamin in Enum.GetValues(typeof(JenisKelamin)))
+      {
+        <option value="@jenisKelamin">@jenisKelamin</option>
+      }
+    </InputSelect>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Status : @pegawaiVM.Status</label>
+    <InputSelect class="form-control" @bind-Value="pegawaiVM.Status">
+      @foreach (var status in Enum.GetValues(typeof(JenisStatusEnum)))
+      {
+        <option value="@status">@status</option>
+      }
+    </InputSelect>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Gaji Pokok: @pegawaiVM.GajiPokok</label>
+    <InputNumber class="form-control" @bind-Value="pegawaiVM.GajiPokok" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Uang Makan: @pegawaiVM.UangMakan</label>
+    <InputNumber class="form-control" @bind-Value="pegawaiVM.UangMakan" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Uang Transport: @pegawaiVM.UangTransport</label>
+    <InputNumber class="form-control" @bind-Value="pegawaiVM.UangTransport" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nilai Tunjangan: @pegawaiVM.NilaiTunjangan</label>
+    <InputNumber hidden class="form-control" @bind-Value="pegawaiVM.NilaiTunjangan" />
+  </div>
+
+  <input class="btn btn-outline-dark" type="submit" value="Create">
+</EditForm>
+
+@code {
+  PegawaiVM pegawaiVM = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    var listPegawai = await _pegawaiService.GetAllPegawai();
+  }
+}
