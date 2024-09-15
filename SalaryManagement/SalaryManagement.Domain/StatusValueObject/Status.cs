@@ -13,7 +13,7 @@ public class Status
     {
         JenisStatus = jenisStatus;
     }
-    private string GetDescription(JenisStatusEnum jenisStatus) =>
+    public static string GetDescription(JenisStatusEnum jenisStatus) =>
         jenisStatus switch
         {
             JenisStatusEnum.T0 => "Tidak kawin tanggungan 0",
@@ -26,7 +26,7 @@ public class Status
             JenisStatusEnum.K3 => "Kawin tanggungan 3",
             _ => "Invalid"
         };
-    private decimal GetNilaiTunjangan(JenisStatusEnum jenisStatus) =>
+    public static decimal GetNilaiTunjangan(JenisStatusEnum jenisStatus) =>
         jenisStatus switch
         {
             JenisStatusEnum.T0 => 300_000m,
@@ -39,6 +39,33 @@ public class Status
             JenisStatusEnum.K3 => 700_000m,
             _ => 0m
         };
+
+    public static JenisStatusEnum ToJenisStatusEnum(string jenisStatus) =>
+        jenisStatus switch
+        {
+            "T1" => JenisStatusEnum.T1,
+            "T2" => JenisStatusEnum.T2,
+            "T3" => JenisStatusEnum.T3,
+            "K0" => JenisStatusEnum.K0,
+            "K1" => JenisStatusEnum.K1,
+            "K2" => JenisStatusEnum.K2,
+            "K3" => JenisStatusEnum.K3,
+            _ => JenisStatusEnum.T0
+        };
+
+    public static string ToString(JenisStatusEnum jenisStatus) =>
+    jenisStatus switch
+    {
+        JenisStatusEnum.T1 => "T1",
+        JenisStatusEnum.T2 => "T2",
+        JenisStatusEnum.T3 => "T3",
+        JenisStatusEnum.K0 => "K0",
+        JenisStatusEnum.K1 => "K1",
+        JenisStatusEnum.K2 => "K2",
+        JenisStatusEnum.K3 => "K3",
+        _ => "T0"
+    };
+
 }
 
 public enum JenisStatusEnum

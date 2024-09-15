@@ -1,0 +1,115 @@
+@page "/pegawai/details/"
+@rendermode InteractiveServer
+@inject PegawaiService _pegawaiService;
+@attribute [StreamRendering]
+
+<h3>Detail Pegawai</h3>
+
+<div>
+  <a class="btn btn-info text-white" href="#">Print</a>
+  <a class="btn btn-outline-success " href="@($"pegawai/lembur/edit?NomerPegawai={pegawaiVM.NomerPegawai}")">Edit
+    Lembur</a>
+  <a class="btn btn-outline-info" href="@($"pegawai/lembur?NomerPegawai={pegawaiVM.NomerPegawai}")">Cek
+    Lembur</a>
+
+</div>
+
+<dl class="row">
+  <dt>
+    Nomer Pegawai :
+  </dt>
+  <dd>
+    @pegawaiVM.NomerPegawai
+  </dd>
+  <dt>
+    Nama Pegawai :
+  </dt>
+  <dd>
+    @pegawaiVM.NamaPegawai
+  </dd>
+  <dt>
+    Tanggal Masuk :
+  </dt>
+  <dd>
+    @pegawaiVM.TanggalMasuk.ToShortDateString()
+  </dd>
+  <dt>
+    Jenis Kelamin :
+  </dt>
+  <dd>
+    @Pegawai.ToJenisKelaminString(pegawaiVM.JenisKelamin)
+  </dd>
+  <dt>
+    Status :
+  </dt>
+  <dd>
+    @pegawaiVM.JenisStatus @Status.GetDescription(pegawaiVM.JenisStatus)
+  </dd>
+  <dt>
+    Gaji Pokok :
+  </dt>
+  <dd>
+    @pegawaiVM.GajiPokok.ToString("0.00")
+  </dd>
+  <dt>
+    Uang Makan :
+  </dt>
+  <dd>
+    @pegawaiVM.UangMakan.ToString("0.00")
+  </dd>
+  <dt>
+    Uang Transport :
+  </dt>
+  <dd>
+    @pegawaiVM.UangTransport.ToString("0.00")
+  </dd>
+  <dt>
+    Uang Lembur :
+  </dt>
+  <dd>
+    @pegawaiVM.UangLembur.ToString("0.0000")
+  </dd>
+  <dt>
+    Nilai Tunjangan :
+  </dt>
+  <dd>
+    @pegawaiVM.NilaiTunjangan.ToString("0.00")
+  </dd>
+  <dt>
+    Total Gaji :
+  </dt>
+  <dd>
+    @pegawaiVM.TotalGaji.ToString("0.0000")
+  </dd>
+</dl>
+
+
+@code {
+  PegawaiRequest pegawaiVM = new();
+  [Parameter]
+  [SupplyParameterFromQuery]
+  public int NomerPegawai { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var response = await _pegawaiService.GetPegawaiById(NomerPegawai);
+    if (!response.IsError)
+    {
+      Pegawai pegawai = response.Value;
+      pegawaiVM = new PegawaiRequest()
+        {
+          NomerPegawai = pegawai.NomerPegawai,
+          NamaPegawai = pegawai.NamaPegawai,
+          TanggalMasuk = pegawai.TanggalMasuk,
+          JenisKelamin = pegawai.JenisKelamin,
+          JenisStatus = Status.ToJenisStatusEnum(pegawai.JenisStatus),
+          GajiPokok = pegawai.GajiPokok,
+          UangMakan = pegawai.UangMakan,
+          UangTransport = pegawai.UangTransport,
+          UangLembur = pegawai.UangLembur,
+          TotalGaji = pegawai.TotalGaji
+        };
+    }
+  }
+
+}

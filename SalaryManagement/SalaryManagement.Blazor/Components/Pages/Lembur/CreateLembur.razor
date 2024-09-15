@@ -1,0 +1,54 @@
+@page "/pegawai/lembur/edit/"
+@rendermode InteractiveServer
+@inject GajiService _gajiService
+@attribute [StreamRendering]
+
+<h3>Data Lembur untuk pegawai : @pegawaiVm.NamaPegawai</h3>
+
+<div class="d-flex justify-content-between">
+  <div class="col-6">
+    <EditForm Model=@lembur class="" OnValidSubmit="AddLembur">
+      <DataAnnotationsValidator />
+      <ValidationSummary />
+      <div class="mb-3">
+        <label class="form-label">Dokumen Lembur : </label>
+        <InputText class="form-control" @bind-Value="@lembur.DokumenLembur" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tanggal : </label>
+        <InputDate class="form-control" @bind-Value="@lembur.Tanggal" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Jumlah Lembur : </label>
+        <InputNumber class="form-control" @bind-Value="@lembur.JumlahLembur" />
+      </div>
+      <input class="btn btn-outline-dark" type="submit" value="Tambah">
+    </EditForm>
+  </div>
+</div>
+
+
+@code {
+  public Lembur lembur = new();
+
+  [Parameter]
+  public PegawaiRequest pegawaiVm { get; set; } = new();
+  [Parameter]
+  [SupplyParameterFromQuery]
+  public int NomerPegawai { get; set; }
+
+  public async Task AddLembur()
+  {
+    if (pegawaiVm is not null)
+    {
+      lembur.NomerPegawai = NomerPegawai;
+      var createResult = await _gajiService.CreateLembur(lembur);
+      if (!createResult.IsError)
+      {
+
+      }
+    }
+  }
+
+
+}

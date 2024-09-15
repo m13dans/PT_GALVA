@@ -1,0 +1,106 @@
+﻿@page "/pegawai/edit/"
+@rendermode InteractiveServer
+@inject PegawaiService _pegawaiService;
+@attribute [StreamRendering]
+
+<h3>Edit Pegawai</h3>
+
+<div class="d-flex justify-content-between">
+
+  <div class="col-6">
+
+    <EditForm Model=@pegawaiVM class="" OnValidSubmit="UpdateForm">
+      <DataAnnotationsValidator />
+      <ValidationSummary />
+      <div class="mb-3">
+        <label class="form-label">Nama Pegawai :</label>
+        <InputText class="form-control" @bind-Value="pegawaiVM.NamaPegawai" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tanggal Masuk: </label>
+        <InputDate class="form-control" @bind-Value="pegawaiVM.TanggalMasuk" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Jenis Kelamin :</label>
+        <InputSelect class="form-select" @bind-Value="pegawaiVM.JenisKelamin">
+          @foreach (var jenisKelamin in Enum.GetValues<JenisKelamin>())
+          {
+            <option value="@jenisKelamin">@Pegawai.ToJenisKelaminString(jenisKelamin)</option>
+          }
+        </InputSelect>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Status : </label>
+        <InputSelect class="form-control" @bind-Value="pegawaiVM.JenisStatus">
+          @foreach (var status in Enum.GetValues<JenisStatusEnum>())
+          {
+            <option value="@status">@status @Status.GetDescription(status)</option>
+          }
+        </InputSelect>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Gaji Pokok: </label>
+        <InputNumber class="form-control" @bind-Value="pegawaiVM.GajiPokok" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Uang Makan: </label>
+        <InputNumber class="form-control" @bind-Value="pegawaiVM.UangMakan" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Uang Transport: </label>
+        <InputNumber class="form-control" @bind-Value="pegawaiVM.UangTransport" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nilai Tunjangan: @pegawaiVM.NilaiTunjangan</label>
+      </div>
+
+      <input class="btn btn-outline-dark" type="submit" value="Update">
+    </EditForm>
+  </div>
+
+  <div class="col-6 mx-4 pe-3 ">
+    <CreateGaji Pegawai="@pegawaiVM"></CreateGaji>
+  </div>
+</div>
+
+
+@code {
+
+  PegawaiRequest pegawaiVM = new();
+  [Parameter]
+  [SupplyParameterFromQuery]
+  public int NomerPegawai { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var response = await _pegawaiService.GetPegawaiById(NomerPegawai);
+    if (!response.IsError)
+    {
+      Pegawai pegawai = response.Value;
+      pegawaiVM = new PegawaiRequest()
+        {
+          NomerPegawai = pegawai.NomerPegawai,
+          NamaPegawai = pegawai.NamaPegawai,
+          TanggalMasuk = pegawai.TanggalMasuk,
+          JenisKelamin = pegawai.JenisKelamin,
+          JenisStatus = Status.ToJenisStatusEnum(pegawai.JenisStatus),
+          GajiPokok = pegawai.GajiPokok,
+          UangMakan = pegawai.UangMakan,
+          UangTransport = pegawai.UangTransport,
+          UangLembur = pegawai.UangLembur,
+          TotalGaji = pegawai.TotalGaji
+        };
+    }
+  }
+
+  public async Task UpdateForm()
+  {
+    var updateResult = await _pegawaiService.UpdatePegawai(NomerPegawai, pegawaiVM);
+    if (!updateResult.IsError)
+    {
+      pegawaiVM = new();
+    }
+  }
+
+
+}

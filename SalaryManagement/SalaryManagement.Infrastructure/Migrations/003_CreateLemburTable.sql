@@ -5,11 +5,10 @@ IF NOT EXISTS (
 BEGIN
 	create table Lembur (
 		Id int primary key clustered identity(1,1),
-		DokumenLembur VARCHAR,
+		DokumenLembur VARCHAR(max),
 		Tanggal DATE,
 		NomerPegawai int not null 
 			CONSTRAINT FK_Lembur_NomerPegawai 
 			REFERENCES Pegawai(NomerPegawai),
-		JumlahLembur float, 
-		UangLembur money)
+		JumlahLembur float)
 END

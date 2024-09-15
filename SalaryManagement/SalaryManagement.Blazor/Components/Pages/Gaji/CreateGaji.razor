@@ -1,0 +1,70 @@
+@inject GajiService _gajiService
+
+<EditForm Model=@gaji class="" OnValidSubmit="SubmitGaji">
+  <DataAnnotationsValidator />
+  <ValidationSummary />
+  <div class="mb-3">
+    <label class="form-label">Tanggal Terakhir Gaji: </label>
+    <InputDate class="form-control" @bind-Value="@gaji.TanggalTerakhirGaji" readonly="readonly" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Tanggal Gaji: </label>
+    <InputDate class="form-control" @bind-Value="@gaji.Tanggal" />
+  </div>
+
+  <input class="btn btn-outline-dark" type="submit" value="Save">
+  <p>Tekan Save untuk tandai gajian pegawai ke database</p>
+</EditForm>
+
+@code {
+  Gaji gaji = new();
+  [Parameter]
+  public PegawaiRequest? Pegawai { get; set; }
+
+  int nomerPegawai;
+
+
+  protected override void OnParametersSet()
+  {
+    if (Pegawai != null)
+    {
+      nomerPegawai = Pegawai.NomerPegawai;
+    }
+  }
+  protected override async Task OnInitializedAsync()
+  {
+    if (Pegawai is not null)
+    {
+      var result = await _gajiService.GetLastGajiFor(nomerPegawai);
+      var result2 = await _gajiService.GetLastGajiFor(nomerPegawai);
+
+      if (result2.IsError)
+      {
+        gaji.TanggalTerakhirGaji = DateTime.Now.AddDays(-1);
+      }
+      else
+      {
+        gaji.TanggalTerakhirGaji = result2.Value.Tanggal;
+      }
+    }
+  }
+
+  public async Task SubmitGaji()
+  {
+    if (Pegawai is not null)
+    {
+      var result = await _gajiService.GetLastGajiFor(Pegawai.NomerPegawai);
+
+      if (result.IsError)
+      {
+        gaji.TanggalTerakhirGaji = DateTime.Now;
+      }
+      if (Pegawai is null)
+      {
+        return;
+      }
+      gaji.NomerPegawai = Pegawai.NomerPegawai;
+      var eventGajiResult = await _gajiService.CreateEventGaji(gaji);
+    }
+  }
+}

@@ -1,54 +1,111 @@
 ﻿@page "/pegawai/"
 @inject PegawaiService _pegawaiService;
-@using SalaryManagement.Blazor.ViewModels
+@inject SweetAlertService Swal
+@attribute [StreamRendering]
+@rendermode InteractiveServer
 
-<h3>List Data Pegawai</h3>
+<div class="mb-3">
+  <h3>List Data Pegawai</h3>
+  <NavLink class="btn btn-outline-dark" href="/pegawai/create/">
+    Tambah Pegawai
+  </NavLink>
+</div>
 
 <PageTitle>Pegawai</PageTitle>
 
-@if (!listPegawaiVM.Any())
+@if (pegawaiList is null)
 {
   <p>Loading...</p>
 }
 else
 {
-  <table class="table">
-    <thead>
-      <tr>
-        <th>
-          <label>@listPegawaiVM.</label>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table table-responsive">
+
+    <QuickGrid Class="table table-sm text-center" Items="@pegawaiList">
+      <TemplateColumn Context="pegawai" Title="Action">
+        <div class="d-flex justify-content-between">
+          <a href="@($"pegawai/details?NomerPegawai={pegawai.NomerPegawai}")"><i class="bi bi-eye text-black"></i></a>
+          <a href="@($"pegawai/edit?NomerPegawai={pegawai.NomerPegawai}")"><i class="bi bi-pencil text-info"></i></a>
+          <span style="cursor:pointer" @onclick="() => DeletePegawai(pegawai.NomerPegawai)">
+            <i class="bi  bi-trash text-danger"></i>
+          </span>
+        </div>
+      </TemplateColumn>
+      <PropertyColumn Property="@(p => p.NomerPegawai)" Title="No Pegawai" Sortable="true" />
+      <PropertyColumn Property="@(p => p.NamaPegawai)" Title="Nama Pegawai" Sortable="true" />
+      <PropertyColumn Property="@(p => p.TanggalMasuk)" Title="Tanggal Masuk" Sortable="true" Format="dd/MM/yyyy" />
+      <PropertyColumn Property="@(p => Pegawai.ToJenisKelaminString(p.JenisKelamin))" Title="jenis Kelamin"
+        Sortable="true" />
+      <PropertyColumn Property="@(p => p.JenisStatus)" Title="Jenis Status" Sortable="true" />
+      <PropertyColumn Property="@(p => p.GajiPokok.ToString("0.00"))" Title="Gaji Pokok" Sortable="true" />
+      <PropertyColumn Property="@(p => p.UangMakan.ToString("0.00"))" Title="Uang Makan" Sortable="true" />
+      <PropertyColumn Property="@(p => p.UangTransport.ToString("0.00"))" Title="Uang Transport" Sortable="true" />
+      <PropertyColumn Property="@(p => p.UangLembur.ToString("0.00"))" Title="Uang Lembur" Sortable="true" />
+      <PropertyColumn Property="@(p => p.NilaiTunjangan.ToString("0.00"))" Title="Nilai Tunjangan" Sortable="true" />
+      <PropertyColumn Property="@(p => p.TotalGaji.ToString("0.00"))" Title="Total Gaji" Sortable="true" />
+    </QuickGrid>
+  </div>
+
 }
 
 
 @code {
-  List<PegawaiVM> listPegawaiVM = [];
+  public IQueryable<PegawaiRequest>? pegawaiList { get; set; }
 
   protected override async Task OnInitializedAsync()
   {
     var listPegawai = await _pegawaiService.GetAllPegawai();
-    var result = listPegawai.Select(x => new PegawaiVM
+    pegawaiList = listPegawai.Select(x => new PegawaiRequest
       {
         NomerPegawai = x.NomerPegawai,
         NamaPegawai = x.NamaPegawai,
         TanggalMasuk = x.TanggalMasuk,
         JenisKelamin = x.JenisKelamin,
-        Status = x.Status.JenisStatus,
+        JenisStatus = Status.ToJenisStatusEnum(x.JenisStatus),
         GajiPokok = x.GajiPokok,
         UangMakan = x.UangMakan,
         UangTransport = x.UangTransport,
         UangLembur = x.UangLembur,
-        NilaiTunjangan = x.NilaiTunjangan,
         TotalGaji = x.TotalGaji
-      });
-    listPegawaiVM = result.ToList();
+      }).AsQueryable();
+  }
+
+  public async Task DeletePegawai(int nomerPegawai)
+  {
+    await Swal.FireAsync(new SweetAlertOptions
+      {
+        Title = "Data pegawai akan dihapus",
+        Text = "Apa anda yakin akan menghapus data pegawai ini",
+        Icon = SweetAlertIcon.Warning,
+        ShowCancelButton = true,
+        ConfirmButtonText = "Ya Hapus",
+        CancelButtonText = "Tidak"
+      }).ContinueWith(async swalTask =>
+    {
+      SweetAlertResult result = swalTask.Result;
+      if (!string.IsNullOrEmpty(result.Value))
+      {
+
+        var deleteResult = await _pegawaiService.DeletePegawai(nomerPegawai);
+        if (!deleteResult.IsError)
+        {
+          await Swal.FireAsync(
+    "Dihapus",
+    "Data Pegawai sudah dihapus",
+    SweetAlertIcon.Success
+    );
+
+        }
+      }
+      else if (result.Dismiss == DismissReason.Cancel)
+      {
+        await Swal.FireAsync(
+  "Cancelled",
+  "Data Tidak dihapus",
+  SweetAlertIcon.Error
+  );
+      }
+    });
+
   }
 }

@@ -5,7 +5,7 @@ namespace SalaryManagement.Application.PegawaiFeature;
 
 public class PegawaiValidator
 {
-    public static ErrorOr<Pegawai> ValidateCreate(CreatePegawaiRequest request)
+    public static ErrorOr<Pegawai> ValidateCreate(PegawaiRequest request)
     {
         throw new NotImplementedException();
     }

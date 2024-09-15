@@ -1,0 +1,30 @@
+@page "/pegawai/lembur/"
+@rendermode InteractiveServer
+@inject GajiService _gajiService
+@attribute [StreamRendering]
+
+<QuickGrid Items="@Lemburs">
+  <PropertyColumn Property="@(p => p.DokumenLembur)" Title="Dokumen Lembur" Sortable="true" />
+  <PropertyColumn Property="@(p => p.JumlahLembur)" Title="Tanggal" Sortable="true" />
+  <PropertyColumn Property="@(p => p.Tanggal)" Title="Tanggal" Sortable="true" Format="dd/MM/yyyy" />
+</QuickGrid>
+
+@code {
+  [Parameter]
+  public PegawaiRequest pegawaiVm { get; set; } = new();
+  [Parameter]
+  [SupplyParameterFromQuery]
+  public int NomerPegawai { get; set; }
+
+  public IQueryable<Lembur> Lemburs { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var listLembur = await _gajiService.GetLastLemburListFor(NomerPegawai);
+    if (!listLembur.IsError)
+    {
+      Lemburs = listLembur.Value.AsQueryable();
+    }
+  }
+
+}

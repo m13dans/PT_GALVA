@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using ErrorOr;
 using SalaryManagement.Domain.GajiDomain;
 using SalaryManagement.Domain.StatusValueObject;
@@ -11,18 +12,21 @@ public class Pegawai
     public required string NamaPegawai { get; set; }
     public DateTime TanggalMasuk { get; set; }
     public JenisKelamin JenisKelamin { get; set; }
-    public required Status Status { get; set; }
+    public required string JenisStatus { get; set; }
     public decimal GajiPokok { get; set; }
     public decimal UangMakan { get; set; }
     public decimal UangTransport { get; set; }
     public List<Lembur>? Lembur { get; set; }
-    public decimal UangLembur => GetUangLembur(Lembur);
-    public decimal NilaiTunjangan => Status.NilaiTunjangan;
+    public decimal UangLembur =>
+        Lembur is not null && Lembur.Any(x => x is not null) ?
+        Lembur.Sum(x => GajiCalculator.HitungUangLembur(
+            x.JumlahLembur,
+            GajiPokok,
+            UangMakan,
+            UangTransport)) : 0;
+    public decimal NilaiTunjangan => Status.GetNilaiTunjangan(Status.ToJenisStatusEnum(JenisStatus));
 
     public decimal TotalGaji => GajiPokok + UangMakan + UangTransport + UangLembur + NilaiTunjangan;
-
-    private decimal GetUangLembur(List<Lembur>? lemburs) =>
-        lemburs is null ? 0 : lemburs.Where(l => l.Pegawai.NomerPegawai == NomerPegawai).Sum(x => x.UangLembur);
 
     private Pegawai() { }
 
@@ -30,7 +34,7 @@ public class Pegawai
         string namaPegawai,
         DateTime tanggalMasuk,
         JenisKelamin jenisKelamin,
-        JenisStatusEnum status,
+        string status,
         decimal gajiPokok,
         decimal uangMakan,
         decimal uangTransport)
@@ -43,16 +47,25 @@ public class Pegawai
             NamaPegawai = namaPegawai,
             TanggalMasuk = tanggalMasuk,
             JenisKelamin = jenisKelamin,
-            Status = new Status(status),
+            JenisStatus = status,
             GajiPokok = gajiPokok,
             UangMakan = uangMakan,
             UangTransport = uangTransport
         };
     }
+
+    public static string ToJenisKelaminString(JenisKelamin jenisKelamin) =>
+    jenisKelamin switch
+    {
+        JenisKelamin.LakiLaki => "Laki-laki",
+        JenisKelamin.Perempuan => "Perempuan",
+        _ => ""
+    };
+
 }
 public enum JenisKelamin
 {
-    [EnumMember(Value = "Laki-Laki")]
+    [Display(Name = "Laki - laki")]
     LakiLaki,
     [EnumMember(Value = "Perempuan")]
     Perempuan

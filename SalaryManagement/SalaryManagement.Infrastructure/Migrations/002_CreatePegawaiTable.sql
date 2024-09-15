@@ -6,7 +6,7 @@ BEGIN
 	create table Pegawai (
 		NomerPegawai int primary key clustered identity(1,1),
 		NamaPegawai VARCHAR(255), 
-		TanggalMasuk VARCHAR(255),
+		TanggalMasuk DATE,
 		JenisKelamin int,
 		[Status] varchar(50), 
 		GajiPokok money, 
