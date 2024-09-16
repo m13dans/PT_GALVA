@@ -13,3 +13,5 @@ Tugas mengerjakan aplikasi reporting
 
 
 -Penghitungan business logic di domain dan application layer
+
+-Migration untuk memudahkan up and running database dengan Dapper dan DBUp
