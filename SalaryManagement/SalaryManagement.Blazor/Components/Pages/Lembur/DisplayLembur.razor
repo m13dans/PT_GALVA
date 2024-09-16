@@ -16,7 +16,7 @@
   [SupplyParameterFromQuery]
   public int NomerPegawai { get; set; }
 
-  public IQueryable<Lembur> Lemburs { get; set; }
+  public IQueryable<Lembur>? Lemburs { get; set; }
 
   protected override async Task OnInitializedAsync()
   {

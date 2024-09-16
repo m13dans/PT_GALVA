@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject PegawaiService _pegawaiService;
 @attribute [StreamRendering]
+@inject SweetAlertService Swal
 
 <PageTitle>Pegawai</PageTitle>
 
@@ -68,5 +69,13 @@
   private async Task SubmitForm()
   {
     var createResult = await _pegawaiService.CreatePegawai(pegawaiVM);
+    if (!createResult.IsError)
+    {
+      await Swal.FireAsync(
+      "Ditambahkan",
+      "Data Pegawai sudah ditambahkan",
+      SweetAlertIcon.Success
+      );
+    }
   }
 }

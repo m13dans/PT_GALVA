@@ -15,6 +15,10 @@ var connectionString = builder.Configuration.GetConnectionString("SQLConnection"
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF1cWWhAYVF0WmFZfVpgcl9FYFZQQ2Y/P1ZhSXxXdkxiXH5Wc3RUQWFdV0I=");
+
+
+
 builder.Services.AddScoped<DbConnectionFactory>();
 
 builder.Services.AddScoped<PegawaiService>();

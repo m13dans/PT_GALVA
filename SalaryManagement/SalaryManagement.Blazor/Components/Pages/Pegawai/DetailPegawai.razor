@@ -1,17 +1,30 @@
 @page "/pegawai/details/"
 @rendermode InteractiveServer
-@inject PegawaiService _pegawaiService;
+@inject GajiService _gajiService
+@inject PegawaiService _pegawaiService
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment webhostEnv
+@inject Microsoft.JSInterop.IJSRuntime _js
+@using Blazor.Service
 @attribute [StreamRendering]
 
 <h3>Detail Pegawai</h3>
 
 <div>
-  <a class="btn btn-info text-white" href="#">Print</a>
-  <a class="btn btn-outline-success " href="@($"pegawai/lembur/edit?NomerPegawai={pegawaiVM.NomerPegawai}")">Edit
+  <button disabled="@(reportGaji is null)" @onclick="@(() => ViewPDF("iframeId"))" class="btn btn-info text-white"
+    href="#"><i class="bi bi-printer"></i>Lihat PDF
+    PDF</button>
+  <button disabled="@(reportGaji is null)" @onclick="DownloadPDF" class="btn btn-outline-success " href="#"><i
+      class="bi bi-printer"></i>Download
+    PDF</button>
+  <a class="btn btn-outline-warning " href="@($"pegawai/lembur/edit?NomerPegawai={pegawaiVM.NomerPegawai}")">Edit
     Lembur</a>
-  <a class="btn btn-outline-info" href="@($"pegawai/lembur?NomerPegawai={pegawaiVM.NomerPegawai}")">Cek
+  <a class="btn btn-outline-info @(reportGaji is null ? "disabled" : "")"
+    href="@($"pegawai/lembur?NomerPegawai={pegawaiVM.NomerPegawai}")">Cek
     Lembur</a>
 
+</div>
+<div class="d-flex justify-content-center my-3">
+  <div id="iframeId" class="position-absolute w-75"></div>
 </div>
 
 <dl class="row">
@@ -90,9 +103,37 @@
   [SupplyParameterFromQuery]
   public int NomerPegawai { get; set; }
 
+  public ReportGaji reportGaji;
+
+  protected async void DownloadPDF()
+  {
+    PDFGenerator service = new(webhostEnv);
+    MemoryStream documentStream = service.CreatePDF(reportGaji);
+    await _js.InvokeAsync<object>(
+    "saveAsFile",
+    $"Report_Gaji_{reportGaji.NamaPegawai}.pdf",
+    Convert.ToBase64String(documentStream.ToArray())
+    );
+  }
+  protected async void ViewPDF(string iframeId)
+  {
+    PDFGenerator service = new(webhostEnv);
+    MemoryStream documentStream = service.CreatePDF(reportGaji);
+    await _js.InvokeVoidAsync(
+    "viewPDF",
+    iframeId,
+    Convert.ToBase64String(documentStream.ToArray())
+    );
+  }
+
   protected override async Task OnInitializedAsync()
   {
     var response = await _pegawaiService.GetPegawaiById(NomerPegawai);
+    var report = await _gajiService.GetReportGajiFor(NomerPegawai);
+    if (!report.IsError)
+    {
+      reportGaji = report.Value;
+    }
     if (!response.IsError)
     {
       Pegawai pegawai = response.Value;

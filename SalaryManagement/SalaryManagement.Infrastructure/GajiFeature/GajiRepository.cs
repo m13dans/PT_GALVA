@@ -1,12 +1,14 @@
 using Dapper;
 using ErrorOr;
 using SalaryManagement.Application.GajiFeature;
+using SalaryManagement.Application.PegawaiFeature;
 using SalaryManagement.Domain.GajiDomain;
 using SalaryManagement.Infrastructure.Data;
+using SalaryManagement.Infrastructure.PegawaiFeature;
 
 namespace SalaryManagement.Infrastructure.GajiFeature;
 
-public class GajiRepository(DbConnectionFactory dbConnection) : IGajiRepository
+public class GajiRepository(DbConnectionFactory dbConnection, IPegawaiRepository pegawaiRepo) : IGajiRepository
 {
     public async Task<ErrorOr<Gaji>> GetLastGajiFor(int nomerPegawai)
     {
@@ -51,10 +53,22 @@ public class GajiRepository(DbConnectionFactory dbConnection) : IGajiRepository
             )
         """;
 
+        var sql2 = """
+            Update Pegawai 
+            SET Uanglembur = @UangLembur
+            Where NomerPegawai = @NomerPegawai
+        """;
+
         using var conn = dbConnection.CreateConnection();
         var result = await conn.ExecuteAsync(sql, gaji);
         if (result <= 0)
             return Error.Failure("Gaji.Failure", "Tidak Bisa input gaji");
+
+        var pegawai = await pegawaiRepo.GetPegawaiById(gaji.NomerPegawai);
+        if (!pegawai.IsError)
+        {
+            await conn.ExecuteAsync(sql2, new { NomerPegawai = gaji.NomerPegawai, UangLembur = pegawai.Value.UangLembur });
+        }
 
         return Result.Created;
     }

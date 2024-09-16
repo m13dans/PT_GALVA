@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @inject GajiService _gajiService
 @attribute [StreamRendering]
+@inject SweetAlertService Swal
+
 
 <h3>Data Lembur untuk pegawai : @pegawaiVm.NamaPegawai</h3>
 
@@ -45,7 +47,11 @@
       var createResult = await _gajiService.CreateLembur(lembur);
       if (!createResult.IsError)
       {
-
+        await Swal.FireAsync(
+        "Ditambahkan",
+        "Data lembur sudah ditambahkan",
+        SweetAlertIcon.Success
+        );
       }
     }
   }

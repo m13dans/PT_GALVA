@@ -1,6 +1,7 @@
 ﻿@page "/pegawai/edit/"
+@inject SweetAlertService Swal
 @rendermode InteractiveServer
-@inject PegawaiService _pegawaiService;
+@inject PegawaiService _pegawaiService
 @attribute [StreamRendering]
 
 <h3>Edit Pegawai</h3>
@@ -98,7 +99,11 @@
     var updateResult = await _pegawaiService.UpdatePegawai(NomerPegawai, pegawaiVM);
     if (!updateResult.IsError)
     {
-      pegawaiVM = new();
+      await Swal.FireAsync(
+      "Ditambahkan",
+      "Data Pegawai sudah diupdate",
+      SweetAlertIcon.Success
+      );
     }
   }
 

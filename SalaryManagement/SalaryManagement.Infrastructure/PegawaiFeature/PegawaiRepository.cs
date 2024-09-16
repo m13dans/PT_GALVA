@@ -191,14 +191,21 @@ public class PegawaiRepository(DbConnectionFactory dbConnection) : IPegawaiRepos
 
     public async Task<ErrorOr<Deleted>> DeletePegawai(int nomerPegawai)
     {
+        string deleteChild = "DELETE FROM Lembur WHERE NomerPegawai = @NomerPegawai";
+        string deleteGaji = "DELETE FROM Gaji WHERE NomerPegawai = @NomerPegawai";
+
         string sql = """
                 DELETE FROM Pegawai Where NomerPegawai = @NomerPegawai
         """;
 
+
         using var conn = dbConnection.CreateConnection();
+        var deleteChildResult = await conn.ExecuteAsync(deleteChild, new { NomerPegawai = nomerPegawai });
+        var deleteGajiResult = await conn.ExecuteAsync(deleteGaji, new { NomerPegawai = nomerPegawai });
+
         var result = await conn.ExecuteAsync(sql, new { NomerPegawai = nomerPegawai });
         if (result <= 0)
-            return ErrorPegawai.Validation();
+            return Error.Failure(description: "Data Tidak Terhapus");
 
         return Result.Deleted;
     }
